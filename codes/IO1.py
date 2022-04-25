@@ -18,7 +18,7 @@ Ij=[2,2,1,3]
 O,I=[],[]
 
 for i in range(0,5):
-    O.append(A[Oi[i]-1,Oj[i]-1])    
+    O.append(A[Oi[i]-1,Oj[i]-1])
 
 "获取需求值"
 for j in range(0,4):
