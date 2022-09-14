@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ch">
+  <head>
+    <meta charset="UTF-8" />
+    <title>营养物质循环算法示意</title>
+    <style>
+      body {
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        background: linear-gradient(to top left, #28b487, #7dd56f);
+      }
+      h1 {
+        font-family: sans-serif;
+        font-size: 50px;
+        /* line-height: 1.3; */
+        width: 100%;
+        padding: 30px;
+        /* text-align: left; */
+        color: white;
+        /* top: 2rem; */
+      }
+      .hidden {
+        display: none;
+      }
+
+      img {
+        position: absolute;
+        left: 33%;
+        top: 22rem;
+      }
+      .name {
+        font-size: 1.6rem;
+        padding: 1rem 2rem;
+        position: absolute;
+        top: 2rem;
+        left: 2rem;
+      }
+      .next,
+      .last {
+        font-size: 1.6rem;
+        padding: 1rem 2rem;
+        position: absolute;
+        top: 8rem;
+      }
+      .last {
+        left: 4rem;
+      }
+      .next {
+        right: 4rem;
+      }
+
+      .text {
+        color: white;
+        font-size: 1.3rem;
+        padding: 1rem 5rem;
+        position: absolute;
+        top: 12rem;
+        left: 2rem;
+      }
+    </style>
+  </head>
+  <body>
+    <h1 class="name">营养物质循环算法示意</h1>
+    <button class="last">上一步</button>
+    <button class="next">下一步</button>
+    <img src="algfig/1.jpg" alt="1" width="500" height="500" />
+    <p class="text" id="1">
+      运输距离计算基于从大到小,由近及远的计算原则,将供给值网格由大到小排列,计算每个供给值网格到所有需求值网格的距离,
+      由近及远将磷元素输送至农田. 如下图所示,
+      我们用一个5x5的区域举例说明(假设中间3x3的网格为城市行政边界范围内部),
+      下图为营养物质供给网格(居民点), 其数字代表其供给能力(总量31).
+    </p>
+
+    <p class="text hidden" id="2">
+      下图为营养物质需求格网(即农田),数值代表该格网需要多少营养元素供给(总量32),
+      可见中心点(城市内部),
+      以及城市外部(第一行,第一列,第五行,第五列)均有农田分布,
+      因此,营养元素在向城市外部运输的同时也需要向城市内部输送.
+    </p>
+
+    <p class="text hidden" id="3">
+      第一步: 利用供给网格的数值减去需求网格,
+      确认每个网格内部是供大于求还是求大于供(正数为供大于求,
+      这个网格向外运输营养物质; 负数为求大于供, 该网格接受外部传来的营养物质)
+    </p>
+
+    <p class="text hidden" id="4">
+      第二步:
+      从数值最大的网格开始,由大到小依次传输营养物质(本次示例中为第四行第四列(4,
+      4), 供给为11), (4, 4)首先向距离最近的(5, 4)网格运输营养,运输后(4,4)变成7,
+      (5, 4)变成0
+    </p>
+
+    <p class="text hidden" id="5">
+      随后, (4, 4)继续向最近的(3, 3), (3, 5), (5, 5)分别运输营养, 运输完成后,
+      (4, 4)数值归零, (4, 4)完成运输, 其最大运输距离即(4, 4)与(3, 3), (3, 5),
+      (5, 5)任意一点的距离(1.414). 接下来, 网格中数值最大的为(2, 3), 则开始从(2,
+      3)进行营养物质运输
+    </p>
+
+    <p class="text hidden" id="6">
+      首先填补最近的两个需求格网, 接下来最近的两个分别是(1, 2)与(1, 4), 而(3,
+      3)仅剩下2点供给能力, 此时, 平均分配这两点给所有网格, 如果不够分配,
+      则随机分配格点, 不影响该点营养物质运输距离
+    </p>
+
+    <p class="text hidden" id="7">对剩下的格点反复进行前述过程</p>
+
+    <p class="text hidden" id="8">
+      继续分配(3, 4), 此时将(3, 4)运输至(3, 1)的运输距离为全局最大值3,
+      因此在这个示例中, 营养物质运送距离最大达到3个网格单元
+    </p>
+
+    <p class="text hidden" id="9">继续分配</p>
+
+    <p class="text hidden" id="10">继续分配</p>
+
+    <p class="text hidden" id="11">继续分配</p>
+
+    <p class="text hidden" id="12">
+      至此,仅剩一个供给点没有分配完(2, 2), 下一步,将该点营养物质运送至(1,
+      1)则所有供给点分配完毕, 所有营养运送完成
+    </p>
+
+    <p class="text hidden" id="13">
+      运送完毕, 最远运送距离为(4,3)向(3, 1)运输时的3个网格单元
+    </p>
+    <script>
+      "use strict";
+
+      const btnNext = document.querySelector(".next");
+      const btnLast = document.querySelector(".last");
+      const fig = document.querySelector("img");
+      let figNumber = 1;
+
+      btnNext.addEventListener("click", function () {
+        if (figNumber < 13) {
+          document.getElementById(`${figNumber}`).classList.add("hidden");
+        }
+        figNumber++;
+        if (figNumber <= 13) {
+          fig.src = `algfig/${figNumber}.jpg`;
+          document.getElementById(`${figNumber}`).classList.remove("hidden");
+        } else {
+          figNumber = 13;
+        }
+      });
+
+      btnLast.addEventListener("click", function () {
+        if (figNumber > 1) {
+          document.getElementById(`${figNumber}`).classList.add("hidden");
+        }
+
+        figNumber--;
+        if (figNumber >= 1) {
+          fig.src = `algfig/${figNumber}.jpg`;
+          document.getElementById(`${figNumber}`).classList.remove("hidden");
+        } else {
+          figNumber = 1;
+        }
+      });
+    </script>
+  </body>
+</html>
