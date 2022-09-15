@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 class calNutritionTransformDistance(object):
 
     def readData(self, file):
-        """read the supply and demand data
+        """read the supply and demand data and preprocessing
 
         Args:
             file (string): file path
@@ -15,7 +15,11 @@ class calNutritionTransformDistance(object):
         """
         df = pd.read_csv(file)
         df = df.fillna(0)
+
+        #计算需求值
         df['pneed'] = df['grid_code'] * 0.9 * 100
+
+        #将供给与需求值合并
         df['gridResult'] = df['buildingP'] - df['pneed']
         return df
 
@@ -92,7 +96,7 @@ class calNutritionTransformDistance(object):
             demandIndex (list): 所有需求网格的索引（即坐标）
 
         Returns:
-            dict: 字典的键为索引号，值为
+            dict: 字典的键为供给索引号，值为一个二维列表，其中第一个值为需求索引，值为距离
         """
         s_to_d_distance = {}
         for s in supplyIndex:
@@ -102,6 +106,14 @@ class calNutritionTransformDistance(object):
         return s_to_d_distance
 
     def sortDisDict(self, s_to_d_distance):
+        """对距离字典进行排序
+
+        Args:
+            s_to_d_distance (dict): 各供给点至需求点距离
+
+        Returns:
+            dict: 排序后的距离字典
+        """
         sortedDistanceDict = {}
         for i in s_to_d_distance:
             sortedDistanceDict[i] = sorted(s_to_d_distance[i], key=lambda x: x[1])
@@ -109,6 +121,15 @@ class calNutritionTransformDistance(object):
 
 
     def calcIndexWithValueSupply(self, twoDArray, sortedDistanceDict):
+        """为每个供给点索引赋予供给值，并从大到小进行排列
+
+        Args:
+            twoDArray (list): 包括所有供需值的二维列表
+            sortedDistanceDict (dict): 排序后的供需距离字典
+
+        Returns:
+            list: 从大到小排列的供给索引及攻击值
+        """
         indexWithValueSupply = []
         for index in sortedDistanceDict.keys():
             supply = twoDArray[index]
@@ -118,6 +139,16 @@ class calNutritionTransformDistance(object):
         
 
     def iterateCalculation(self, twoDArray, indexWithValueSupply, sortedDistanceDict):
+        """算法的主要实现步骤，计算与迭代
+
+        Args:
+            twoDArray ([type]): [description]
+            indexWithValueSupply ([type]): [description]
+            sortedDistanceDict ([type]): [description]
+
+        Returns:
+            [type]: [description]
+        """
         distance_array = []
         testTwoDArray = twoDArray.copy()
         for supply in indexWithValueSupply:
@@ -130,7 +161,7 @@ class calNutritionTransformDistance(object):
                     tempDemand += tempSupply
                     testTwoDArray[supply[0]] = tempSupply
                     testTwoDArray[demand[0]] = tempDemand
-                    # distance_array.append([supply[0], demand[0], calEucDistance(supply[0], demand[0])])
+
                     
                 elif tempSupply > tempDemand:
                     tempSupply += tempDemand
@@ -145,15 +176,16 @@ class calNutritionTransformDistance(object):
         distance_array.sort(key=lambda x: x[2], reverse=True)
         return distance_array, testTwoDArray
 
-testObj = calNutritionTransformDistance()
+
         
 
 if __name__ == "__main__":
+    testObj = calNutritionTransformDistance()
     df = testObj.readData(r'C:\Users\oo\Desktop\Project-Nutrition-Distance\codes\test\t.csv')
     twoDArray, supplyIndex, demandIndex = testObj.calcGridIndex(df['gridResult'].values)
     print('————————————————————输送前————————————————————————')
     testObj.showGridNumbers(twoDArray)
-    testObj.showMatrix(twoDArray)
+    testObj.showMatrix(twoDArray, name= r'C:\Users\oo\Desktop\Project-Nutrition-Distance\codes\test\输送前.jpg')
     s_to_d_distance = testObj.calcIndexDistance(supplyIndex, demandIndex)
     sortedDistanceDict = testObj.sortDisDict(s_to_d_distance)
     indexWithValueSupply = testObj.calcIndexWithValueSupply(twoDArray, sortedDistanceDict)
@@ -161,7 +193,7 @@ if __name__ == "__main__":
     print('————————————————————输送后————————————————————————')
     testObj.showGridNumbers(finalGrids)
     print('最远输送距离为网格{0}至{1}，距离为{2}单位'.format(distance_array[0][0], distance_array[0][1], distance_array[0][2]))
-    testObj.showMatrix(finalGrids, name= r'C:\Users\oo\Desktop\Project-Nutrition-Distance\codes\test\test2.jpg')
+    testObj.showMatrix(finalGrids, name= r'C:\Users\oo\Desktop\Project-Nutrition-Distance\codes\test\输送后.jpg')
 
 
     
